@@ -8,6 +8,36 @@
 #include <RotaryEncoder.h>
 #include "FastLED.h"
 
+// STRUCTS
+
+struct Switches { 
+  bool kitchenMain = true;
+  bool bedMain = true;
+  bool topCubbyLED = true;
+  bool bedCubbyLED = true;
+  bool kitchenLED = true;
+  bool bedLED = true;
+}; //Switches
+
+struct RGBValue { 
+  byte r = byte(255);
+  byte g = byte(255);
+  byte b = byte(255);
+}; //RGBValue
+
+struct LEDSettings { 
+  RGBValue kitchenMain;
+  RGBValue bedMain;
+  RGBValue topCubbyLED;
+  RGBValue bedCubbyLED;
+  RGBValue kitchenLED;
+  RGBValue bedLED;
+}; //LedSettings
+
+
+
+
+
 // DEFINES - LIGHTING OUTPUT LED
 
 #define TOP_CUBBY_LEDS 2 // ***FIXME*** needs real number
@@ -96,9 +126,10 @@ volatile uint16_t currtouched = 0;
 
 volatile int controlEncoderCurrentPosition = 0;
 
-// VARIABLES - LIGHTING PROFILE
+// VARIABLES - LIGHTING
 
-volatile char *lightingProfile[100];
+volatile Switches currentSwitches; 
+volatile LEDSettings currentLEDSettings; 
 
 
 void setup() {
@@ -114,7 +145,7 @@ void setup() {
 
   char currentString[20] = {"bob"};
   char *currentStringPtr = &currentString[20];
-  lightingProfile[0] = currentStringPtr;
+  //lightingProfile[0] = currentStringPtr;
 
   
 
@@ -454,62 +485,45 @@ void requestProfiles(char *profile[]){
 
 }// requestProfiles()
 
-
-
-struct RedGreenBlue { 
-  byte r;
-  byte g;
-  byte b;
-}; //RedGreenBlue
-
 class LightingProfile{
 
   char *profileName;
+  Switches profileSwitches; 
+  LEDSettings profileLEDValues;
 
-  bool *profileSwitches;
-  
-  RedGreenBlue *topCubbyValues; 
-  RedGreenBlue *bedCubbyValues;
-  RedGreenBlue *kitchenLEDValues;
-  RedGreenBlue *bedLEDValues;
-
-  public: 
+  public:
+    LightingProfile(){ 
+      
+    }
     LightingProfile ( char profileName_[], 
-                      bool profileSwitches_[], 
-                      byte topCubbyValues_[], 
-                      byte bedCubbyValues_[], 
-                      byte kitchenLEDValues_[], 
-                      byte bedLEDValues_[]){
+                      Switches profileSwitches_, 
+                      LEDSettings profileLEDValues_ 
+                      ){
       
       profileName = profileName_;
       profileSwitches = profileSwitches_;
-      topCubbyValues = tCV;
-      bedCubbyValues = bCV;
-      kitchenLEDValues = kLV;
-      bedLEDValues = bLV; 
+      profileLEDValues = profileLEDValues_;
       
-    };
+    }
+
     
-    bool getSwitchValue(int s) {
-      return profileSwitches[s];
+    Switches getSwitchValues() {
+      return profileSwitches;
     };
   
-    void setSwitchValue(int s, bool value) { 
-      profileSwitches[s] = value;  
+    void setSwitchValues(Switches target, bool source[]) { 
+      profileSwitches.kitchenMain = source[0]; 
+      profileSwitches.bedMain = source[1]; 
+      profileSwitches.topCubbyLED = source[2]; 
+      profileSwitches.bedCubbyLED = source[3]; 
+      profileSwitches.kitchenLED = source[4]; 
+      profileSwitches.bedLED = source[5];  
     }
 
-    void setTopCubbyValues(byte r, byte g, byte b){ 
-      topCubbyValues[0] = r; 
-      topCubbyValues[1] = g; 
-      topCubbyValues[2] = b; 
+    void setRGBValues(RGBValue target, byte source[]){
+      target.r = source[0];
+      target.g = source[1];
+      target.b = source[2]; 
     }
-
-    void setBedCubbyValues(byte r, byte g, byte b){ 
-      topCubbyValues[0] = r; 
-      topCubbyValues[1] = g; 
-      topCubbyValues[2] = b; 
-    }
-    
-    
 };
 
